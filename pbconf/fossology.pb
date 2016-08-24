@@ -43,10 +43,8 @@ sshport fossology = 22
 #
 # Global version/tag for the project
 #
-projver fossology = trunk
+projver fossology = 3.1.0
 projtag fossology = 1
-# Hash of valid version names
-version fossology = trunk
 
 # Is it a test version or a production version
 testver fossology = true
