@@ -47,19 +47,6 @@ Description: architecture for analyzing software, web interface
  .
  This package depends on the packages for the web interface.
 
-Package: fossology-scheduler
-Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
-Conflicts: fossology-scheduler-single
-Description: architecture for analyzing software, scheduler
- The FOSSology project is a web based framework that allows you to
- upload software to be picked apart and then analyzed by software agents
- which produce results that are then browsable via the web interface.
- Existing agents include license analysis, metadata extraction, and MIME
- type identification.
- .
- This package contains the scheduler daemon.
-
 Package: fossology-db
 Architecture: any
 Depends: PBDEP, ${misc:Depends}
@@ -89,6 +76,19 @@ Description: architecture for analyzing software, ununpack and adj2nest
  type identification.
  .
  This package contains the ununpack and adj2nest agent programs and their resources.
+
+Package: fossology-scheduler
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: fossology-scheduler-single
+Description: architecture for analyzing software, scheduler
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the scheduler daemon.
 
 Package: fossology-copyright
 Architecture: any
@@ -198,3 +198,15 @@ Description: architecture for analyzing software, monk
  type identification.
  .
  This package contains the monk agent programs and their resources.
+
+Package: fossology-spdk2
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, SPDX v2
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the SPDX v2 agent programs and their resources.
