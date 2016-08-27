@@ -15,22 +15,22 @@ BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm
 Summary:        FOSSology is a licenses exploration tool
 
 %package common
-Requires:       php >= 5.1.6 php-pear >= 5.16 php-pgsql >= 5.1.6 php-process php-mbstring PBDEP
+Requires:       php >= 5.1.6,php-pear >= 5.16,php-pgsql >= 5.1.6,php-process,php-mbstring,PBDEP
 Summary:        Architecture for analyzing software, common files
 Group:          PBGRP
 
 %package web
-Requires:       fossology-common fossology-db fossology-monk httpd
+Requires:       fossology-common,fossology-db,fossology-monk,httpd
 Summary:        Architecture for analyzing software, web interface
 Group:          PBGRP
 
 %package db
-Requires:       postgresql >= 8.1.11 postgresql-server >= 8.1.11
+Requires:       postgresql >= 8.1.11,postgresql-server >= 8.1.11
 Summary:        Architecture for analyzing software, database
 Group:          PBGRP
 
 %package ununpack
-Requires:       fossology-common libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip p7zip-plugins perl file which
+Requires:       fossology-common,libxml2,binutils,bzip2,cpio,mkisofs,poppler-utils,rpm,tar,unzip,gzip,p7zip-plugins,perl,file,which
 Summary:        Architecture for analyzing software, ununpack and adj2nest
 Group:          PBGRP
 
@@ -40,17 +40,17 @@ Summary:        Architecture for analyzing software, scheduler
 Group:          PBGRP
 
 %package copyright
-Requires:       fossology-common pcre
+Requires:       fossology-common,pcre
 Summary:        Architecture for analyzing software, copyright
 Group:          PBGRP
 
 %package buckets
-Requires:       fossology-nomos fossology-pkgagent
+Requires:       fossology-nomos,fossology-pkgagent
 Summary:        Architecture for analyzing software, buckets
 Group:          PBGRP
 
 %package mimetype
-Requires:       fossology-common file-libs
+Requires:       fossology-common,file-libs
 Summary:        Architecture for analyzing software, mimetype
 Group:          PBGRP
 
@@ -60,7 +60,7 @@ Summary:        Architecture for analyzing software, nomos
 Group:          PBGRP
 
 %package pkgagent
-Requires:       fossology-common rpm
+Requires:       fossology-common,rpm
 Summary:        Architecture for analyzing software, pkgagent
 Group:          PBGRP
 
@@ -70,7 +70,7 @@ Summary:        Architecture for analyzing software, delagent
 Group:          PBGRP
 
 %package wgetagent
-Requires:       fossology-common wget subversion git
+Requires:       fossology-common,wget,subversion,git
 Summary:        Architecture for analyzing software, wget_agent
 Group:          PBGRP
 
