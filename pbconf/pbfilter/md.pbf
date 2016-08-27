@@ -14,7 +14,7 @@ filter PBLIC = GPLv2
 filter PBDEP = cabextract,genisoimage,upx,sleuthkit,file
 
 # PBBUILDDEP is replaced by the list of build dependencies
-filter PBBUILDDEP = file-libs,file-devel,perl-Text-Template,perl-podlators
+filter PBBUILDDEP = file-devel,perl-Text-Template,perl-podlators
 
 # PBSUF is replaced by the package suffix ($pbsuf'} in code)
 #filter PBSUF = %{dist}
