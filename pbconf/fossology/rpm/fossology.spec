@@ -11,7 +11,7 @@ Url:            PBURL
 Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
-Recommends:		fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
+#Recommends:		fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
 BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,curl,PBBUILDDEP
 Summary:        FOSSology is a licenses exploration tool
 
@@ -105,6 +105,16 @@ Requires:       fossology-common
 Summary:        Architecture for reusing clearing result of other uploads, reuser
 Group:          PBGRP
 
+%package monk
+Requires:       fossology-common
+Summary:        Architecture for reusing clearing result of other uploads, monk
+Group:          PBGRP
+
+%package monkbulk
+Requires:       fossology-common
+Summary:        Architecture for reusing clearing result of other uploads, monkbulk
+Group:          PBGRP
+
 %description
 PBDESC
 
@@ -167,6 +177,12 @@ This package contains the deciderjob agent programs and their resources.
 
 %description reuser
 This package contains the reuser agent programs and their resources.
+
+%description monk
+This package contains the monk agent programs and their resources.
+
+%description monkbulk
+This package contains the monkbulk agent programs and their resources.
 
 %prep
 %setup -q
@@ -248,9 +264,7 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_sysconfdir}/PBPROJ/mods-enabled/www-page
 %{_sysconfdir}/PBPROJ/mods-enabled/www-async
 %{_sysconfdir}/PBPROJ/mods-enabled/readmeoss
-%{_sysconfdir}/PBPROJ/mods-enabled/spdx2
 %{_datadir}/PBPROJ/readmeoss/*
-%{_datadir}/PBPROJ/spdx2/*
 
 %files ninka
 %{_sysconfdir}/PBPROJ/mods-enabled/ninka
@@ -270,6 +284,16 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %dir %{_datadir}/PBPROJ/reuser
 %{_sysconfdir}/PBPROJ/mods-enabled/reuser
 %{_datadir}/PBPROJ/reuser/*
+
+%files monk
+%dir %{_datadir}/PBPROJ/monk
+%{_sysconfdir}/PBPROJ/mods-enabled/monk
+%{_datadir}/PBPROJ/monk/*
+
+%files monkbulk
+%dir %{_datadir}/PBPROJ/monkbulk
+%{_sysconfdir}/PBPROJ/mods-enabled/monkbulk
+%{_datadir}/PBPROJ/monkbulk/*
 
 %files scheduler
 %defattr(-,root,root)
@@ -339,8 +363,10 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 %files spdx2
 %defattr(-,root,root)
+%{_sysconfdir}/PBPROJ/mods-enabled/spdx2
 %{_sysconfdir}/PBPROJ/mods-enabled/dep5
 %{_sysconfdir}/PBPROJ/mods-enabled/spdx2tv
+%{_datadir}/PBPROJ/spdx2/*
 %{_datadir}/PBPROJ/dep5/*
 %{_datadir}/PBPROJ/spdx2tv/*
 
