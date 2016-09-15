@@ -11,6 +11,7 @@ Url:            PBURL
 Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
+Recommends:		fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
 BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,curl,PBBUILDDEP
 Summary:        FOSSology is a licenses exploration tool
 
@@ -20,7 +21,7 @@ Summary:        Architecture for analyzing software, common files
 Group:          PBGRP
 
 %package web
-Requires:       fossology-common,fossology-db,fossology-monk,httpd
+Requires:       fossology-common,fossology-db,fossology-decider,apache-mod_php
 Summary:        Architecture for analyzing software, web interface
 Group:          PBGRP
 
@@ -84,9 +85,24 @@ Requires:       fossology-web
 Summary:        SPDX and DEP5 extensions
 Group:          PBGRP
 
-%package monk
+%package ninka
+Requires:       fossology-common,ninka>=1.2
+Summary:        Architecture for analyzing software, Ninka
+Group:          PBGRP
+
+%package decider
 Requires:       fossology-common
-Summary:        Architecture for analyzing software, monk
+Summary:        Architecture for analyzing software, decider
+Group:          PBGRP
+
+%package deciderjob
+Requires:       fossology-common
+Summary:        Architecture for analyzing software, deciderjob
+Group:          PBGRP
+
+%package reuser
+Requires:       fossology-common
+Summary:        Architecture for reusing clearing result of other uploads, reuser
 Group:          PBGRP
 
 %description
@@ -137,11 +153,20 @@ This package contains the delagent agent programs and their resources.
 %description debug
 This package contains the debug UI.
 
-%description monk
-This package contains the monk agent programs and their resources.
-
 %description spdx2
-This package contains the monk agent programs and their resources.
+This package contains the SPDX v2 agent programs and their resources.
+
+%description ninka
+This package contains the ninka wrapper agent programs and their resources.
+
+%description decider
+This package contains the decider agent programs and their resources.
+
+%description deciderjob
+This package contains the deciderjob agent programs and their resources.
+
+%description reuser
+This package contains the reuser agent programs and their resources.
 
 %prep
 %setup -q
@@ -168,7 +193,7 @@ rm -fr /tmp/bin
 #	Options FollowSymLinks MultiViews
 #	Order allow,deny
 #	Allow from all
-#	# uncomment to turn on php error reporting 
+#	# uncomment to turn on php error reporting
 #	#php_flag display_errors on
 #	#php_value error_reporting 2039
 #</Directory>
@@ -205,14 +230,10 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_includedir}/*
 %{_mandir}/man1/*
 %{_sysconfdir}/PBPROJ/mods-enabled/maintagent
-%{_sysconfdir}/PBPROJ/mods-enabled/decider
-%{_sysconfdir}/PBPROJ/mods-enabled/deciderjob
 %{_datadir}/PBPROJ/maintagent/*
 %{_datadir}/PBPROJ/composer.json
 %{_datadir}/PBPROJ/composer.lock
 %{_datadir}/PBPROJ/vendor/*
-%{_datadir}/PBPROJ/decider/*
-%{_datadir}/PBPROJ/deciderjob/*
 
 %files db
 %defattr(-,root,root)
@@ -221,30 +242,45 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 %files web
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/www
 %{_sysconfdir}/PBPROJ/mods-enabled/www
 %{_datadir}/PBPROJ/www/*
 %{_sysconfdir}/PBPROJ/mods-enabled/www-page
 %{_sysconfdir}/PBPROJ/mods-enabled/www-async
 %{_sysconfdir}/PBPROJ/mods-enabled/readmeoss
-%{_sysconfdir}/PBPROJ/mods-enabled/reuser
-%{_sysconfdir}/PBPROJ/mods-enabled/ninka
 %{_sysconfdir}/PBPROJ/mods-enabled/spdx2
 %{_datadir}/PBPROJ/readmeoss/*
-%{_datadir}/PBPROJ/reuser/*
-%{_datadir}/PBPROJ/ninka/*
 %{_datadir}/PBPROJ/spdx2/*
+
+%files ninka
+%{_sysconfdir}/PBPROJ/mods-enabled/ninka
+%{_datadir}/PBPROJ/ninka/*
+
+%files decider
+%dir %{_datadir}/PBPROJ/decider
+%{_sysconfdir}/PBPROJ/mods-enabled/decider
+%{_datadir}/PBPROJ/decider/*
+
+%files deciderjob
+%dir %{_datadir}/PBPROJ/deciderjob
+%{_sysconfdir}/PBPROJ/mods-enabled/deciderjob
+%{_datadir}/PBPROJ/deciderjob/*
+
+%files reuser
+%dir %{_datadir}/PBPROJ/reuser
+%{_sysconfdir}/PBPROJ/mods-enabled/reuser
+%{_datadir}/PBPROJ/reuser/*
 
 %files scheduler
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/scheduler
 %{_sysconfdir}/PBPROJ/mods-enabled/scheduler
 %{_sysconfdir}/init.d/*
 %{_datadir}/PBPROJ/scheduler/*
 
 %files ununpack
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/ununpack
 %{_sysconfdir}/PBPROJ/mods-enabled/ununpack
 %{_sysconfdir}/PBPROJ/mods-enabled/adj2nest
 %{_datadir}/PBPROJ/ununpack/*
@@ -253,13 +289,13 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 %files wgetagent
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/wget_agent
 %{_sysconfdir}/PBPROJ/mods-enabled/wget_agent
 %{_datadir}/PBPROJ/wget_agent/*
 
 %files copyright
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/copyright
 %{_sysconfdir}/PBPROJ/mods-enabled/copyright
 %{_sysconfdir}/PBPROJ/mods-enabled/ecc
 %{_datadir}/PBPROJ/copyright/*
@@ -267,47 +303,39 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 %files buckets
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/buckets
 %{_sysconfdir}/PBPROJ/mods-enabled/buckets
 %{_datadir}/PBPROJ/buckets/*
 
 %files nomos
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/nomos
 %{_sysconfdir}/PBPROJ/mods-enabled/nomos
 %{_datadir}/PBPROJ/nomos/*
 
 %files mimetype
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/mimetype
 %{_sysconfdir}/PBPROJ/mods-enabled/mimetype
 %{_datadir}/PBPROJ/mimetype/*
 
 %files pkgagent
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/pkgagent
 %{_sysconfdir}/PBPROJ/mods-enabled/pkgagent
 %{_datadir}/PBPROJ/pkgagent/*
 
 %files delagent
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/delagent
 %{_sysconfdir}/PBPROJ/mods-enabled/delagent
 %{_datadir}/PBPROJ/delagent/*
 
 %files debug
 %defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/debug
 %{_sysconfdir}/PBPROJ/mods-enabled/debug
 %{_datadir}/PBPROJ/debug/*
-
-%files monk
-%defattr(-,root,root)
-%dir %{_datadir}/PBPROJ
-%{_sysconfdir}/PBPROJ/mods-enabled/monk
-%{_sysconfdir}/PBPROJ/mods-enabled/monkbulk
-%{_datadir}/PBPROJ/monk/*
-%{_datadir}/PBPROJ/monkbulk/*
 
 %files spdx2
 %defattr(-,root,root)
