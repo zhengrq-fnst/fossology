@@ -9,7 +9,7 @@ Homepage: http://fossology.org
 Package: fossology
 Architecture: any
 Depends: fossology-web, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, ${misc:Depends}
-Recommends: fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
+Recommends: fossology-monk, fossology-monkbulk, fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
 Conflicts: fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
@@ -188,6 +188,30 @@ Description: architecture for analyzing software, debug UI
  .
  This package contains the debug UI.
 
+Package: fossology-monk
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, monk
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the monk agent programs and their resources.
+
+Package: fossology-monkbulk
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, monk bulk scanning
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the monk bulk agent programs and their resources.
+
 Package: fossology-ninka
 Architecture: any
 Depends: fossology-common, ninka (>=1.2), ${shlibs:Depends}, ${misc:Depends}
@@ -235,30 +259,6 @@ Description: architecture for reusing clearing result of other uploads, reuser
  type identification.
  .
  This package contains the reuser agent programs and their resources.
-
-Package: fossology-monk
-Architecture: any
-Depends: fossology-common, ${misc:Depends}
-Description: architecture for reusing clearing result of other uploads, monk
- The FOSSology project is a web based framework that allows you to
- upload software to be picked apart and then analyzed by software agents
- which produce results that are then browsable via the web interface.
- Existing agents include license analysis, metadata extraction, and MIME
- type identification.
- .
- This package contains the monk agent programs and their resources.
-
-Package: fossology-monkbulk
-Architecture: any
-Depends: fossology-common, ${misc:Depends}
-Description: architecture for reusing clearing result of other uploads, monkbulk
- The FOSSology project is a web based framework that allows you to
- upload software to be picked apart and then analyzed by software agents
- which produce results that are then browsable via the web interface.
- Existing agents include license analysis, metadata extraction, and MIME
- type identification.
- .
- This package contains the monkbulk agent programs and their resources.
 
 Package: fossology-spdx2
 Architecture: any

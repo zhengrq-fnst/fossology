@@ -193,6 +193,7 @@ fossology (2.1.0-ng) unstable; urgency=low
     * [SOSS-21] - fix bulk scan decision logic
 
  -- Andreas Wuerl <andreas.wuerl.ext@siemens.com>  Fri, 21 Nov 2014 08:00:00 +0100
+
 fossology (2.0.0-1) unstable; urgency=low
 
   * New upstream release
