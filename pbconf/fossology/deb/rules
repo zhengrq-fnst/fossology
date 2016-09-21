@@ -30,14 +30,10 @@ build: build-arch build-indep
 build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp  
 
-	# Fix composer path
-	perl -pi -e 's|composer install -q|/tmp/bin/composer install -q|' $(CURDIR)/src/Makefile
 	# Add here commands to compile the arch part of the package.
 	@dpkg-parsechangelog | sed -n -e 's/^Version: //p' > VERSIONSTRING
 	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var
 	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var -C src/nomos/agent/ -f Makefile.sa
-	mkdir -p /tmp/bin
-	curl -sS https://getcomposer.org/installer | php && mv composer.phar /tmp/bin/composer
 	touch $@
 
 build-indep: build-indep-stamp
@@ -164,8 +160,6 @@ install-arch:
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/spdx2 install
 
-	mkdir -p $(CURDIR)/debian/fossology-dev/usr/bin
-	cp /tmp/bin/composer $(CURDIR)/debian/fossology-dev/usr/bin
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/
 	tar czf $(CURDIR)/debian/fossology-dev/usr/share/fossology/php-vendor.tar.gz -C $(CURDIR)/debian/fossology-common/usr/share/fossology vendor
 
