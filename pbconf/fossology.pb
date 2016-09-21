@@ -58,8 +58,10 @@ testver fossology = true
 #
 #pkgver fossology = stable
 #pkgtag fossology = 3
+pkgver fossology-composer = 1.2.1
 # Hash of default package/package directory
-defpkgdir fossology =  
+defpkgdir fossology =
+defpkgdir fossology-composer =
 # Hash of additional package/package directory
 #extpkgdir minor-pkg = dir-minor-pkg
 

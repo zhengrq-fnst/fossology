@@ -1,0 +1,19 @@
+Source: fossology-composer
+Section: utils
+Priority: extra
+Maintainer: Michael Jaeger <michael.c.jaeger@siemens.com>
+Build-Depends: debhelper, php5, curl
+Standards-Version: PBDEBSTD
+Homepage: http://fossology.org
+
+Package: fossology-composer
+Architecture: any
+Depends: php5, php5-phar
+Description: PHP composer module for FOSSology
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package provides the PHP phar composer module required at build time

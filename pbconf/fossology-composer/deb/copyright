@@ -1,0 +1,32 @@
+This package was debianized by Bruno Cornec <Bruno.Cornec@hpe.com> on
+Sept 21 2016 17:21:53
+
+It was downloaded from http://getcomposer.org
+
+Upstream Authors:
+
+    The FOSSology Development Team <fossology@fossology.org>
+
+Copyright:
+
+    Copyright (C) 2016 Hewlett-Packard Enterprise
+
+    Any modifications or additions to source code or documentation
+    contributed to the FOSSology project from outside of Hewlett Packard
+    Enterprise or its affiliates are Copyright (C) the contributor, and should
+    be noted as such in the comments section of the modified file(s).
+
+License:
+
+    This package is free software; you can redistribute it and/or modify
+    it under the terms of the MIT Public License
+
+    This package is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+On Debian systems, the complete text of the MIT
+License can be found in `/usr/share/common-licenses/MIT'.
+
+The original Debian packaging is (C) 2016, Bruno Cornec <Bruno.Cornec@hpe.com> and
+is licensed under the GPL, see above.

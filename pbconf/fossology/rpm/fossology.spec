@@ -12,7 +12,7 @@ Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
 #Recommends:		fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
-BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,curl,PBBUILDDEP
+BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,curl,fossology-composer,PBBUILDDEP
 Summary:        FOSSology is a licenses exploration tool
 
 %package common
@@ -192,15 +192,10 @@ This package contains the monkbulk agent programs and their resources.
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
 #make %{?_smp_mflags} SYSCONFDIR=%{_sysconfdir}
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} -C src/nomos/agent/ -f Makefile.sa
-mkdir -p /tmp/bin
-curl -sS https://getcomposer.org/installer | php && mv composer.phar /tmp/bin/composer
 
 %install
-%{__rm} -rf $RPM_BUILD_ROOT
-export PATH=$PATH:/tmp/bin
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} install
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} -C src/nomos/agent/ -f Makefile.sa install
-rm -fr /tmp/bin
 #mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d
 #cat > $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d/PBPROJ.conf << EOF
 #Alias /repo/ /usr/share/PBPROJ/www/
