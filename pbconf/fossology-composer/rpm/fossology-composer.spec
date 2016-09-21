@@ -21,8 +21,8 @@ PBDESC
 
 %build
 # Should not be downloaded here but already in the git tree
-curl -sS https://getcomposer.org/download/PBVERTARGET/composer.phar -o composer.phar
-curl -sS https://github.com/composer/composer/blob/master/LICENSE -o LICENSE
+curl -sS https://getcomposer.org/download/PBVTARGET/composer.phar -o composer.phar
+curl -sS https://raw.githubusercontent.com/composer/composer/master/LICENSE -o LICENSE
 
 %install
 install -d -m 755 $RPM_BUILD_ROOT/%{_bindir}

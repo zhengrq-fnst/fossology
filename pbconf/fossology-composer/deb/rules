@@ -37,8 +37,8 @@ build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp  
 
 	@# this currently doesn't do anything, but in case it does someday
-	curl -sS https://getcomposer.org/download/PBVERTARGET/composer.phar -o composer.phar
-	curl -sS https://github.com/composer/composer/blob/master/LICENSE -o LICENSE
+	curl -sS https://getcomposer.org/download/PBVTARGET/composer.phar -o composer.phar
+	curl -sS https://raw.githubusercontent.com/composer/composer/master/LICENSE -o LICENSE
 	touch $@
 
 clean: 
