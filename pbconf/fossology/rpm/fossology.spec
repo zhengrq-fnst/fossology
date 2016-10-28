@@ -21,7 +21,7 @@ Summary:        Architecture for analyzing software, common files
 Group:          PBGRP
 
 %package web
-Requires:       fossology-common,fossology-db,fossology-decider,apache-mod_php
+Requires:       fossology-common,fossology-db,fossology-decider
 Summary:        Architecture for analyzing software, web interface
 Group:          PBGRP
 
@@ -32,6 +32,7 @@ Group:          PBGRP
 
 %package ununpack
 Requires:       fossology-common,libxml2,binutils,bzip2,cpio,mkisofs,poppler-utils,rpm,tar,unzip,gzip,p7zip-plugins,perl,file,which
+PBREC
 Summary:        Architecture for analyzing software, ununpack and adj2nest
 Group:          PBGRP
 
@@ -86,7 +87,8 @@ Summary:        SPDX and DEP5 extensions
 Group:          PBGRP
 
 %package ninka
-Requires:       fossology-common,ninka>=1.2
+Requires:       fossology-common
+Recommends:     ninka >=1.2
 Summary:        Architecture for analyzing software, Ninka
 Group:          PBGRP
 
