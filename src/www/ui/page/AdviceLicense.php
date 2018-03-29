@@ -92,7 +92,7 @@ class AdviceLicense extends DefaultPlugin
 
   private function getArrayArrayData($groupId,$canEdit)
   {
-    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,marydone FROM license_candidate WHERE group_fk=$1";
+    $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,marydone FROM license_candidate WHERE group_fk=$1";
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
     $dbManager->prepare($stmt = __METHOD__, $sql);
@@ -176,10 +176,10 @@ class AdviceLicense extends DefaultPlugin
     }
     if ($oldRow['rf_pk'] == -1)
     {
-      $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText);
+      $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText, Auth::getGroupId());
     }
 
-    $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname, $rfText, $url, !empty($marydone), $riskLvl);
+    $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname, $rfText, $url, $note, !empty($marydone), $riskLvl);
     return array('rf_pk' => $oldRow['rf_pk'],
         'rf_shortname' => $shortname,
         'rf_fullname' => $fullname,

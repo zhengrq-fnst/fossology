@@ -132,7 +132,8 @@ if (!file_exists($SchemaFilePath))
 }
 
 require_once("$MODDIR/lib/php/libschema.php");
-$libschema->setDriver(new Postgres($PG_CONN));
+$pgDriver = new Postgres($PG_CONN);
+$libschema->setDriver($pgDriver);
 $previousSchema = $libschema->getCurrSchema();
 $isUpdating = array_key_exists('TABLE', $previousSchema) && array_key_exists('users', $previousSchema['TABLE']);
 /* @var $dbManager DbManager */
@@ -190,7 +191,7 @@ else
 }
 
 /* initialize the license_ref table */
-if ($UpdateLiceneseRef) 
+if ($UpdateLiceneseRef)
 {
   $row = $dbManager->getSingleRow("SELECT count(*) FROM license_ref",array(),'license_ref.count');
   if ($row['count'] >  0) {
@@ -311,12 +312,45 @@ if(in_array($sysconfig['Release'], $expiredDbReleases))
   $sysconfig['Release'] = '3.0.1';
 }
 
+// Update '3dfx' licence shortname to 'Glide'. Since shortname is used as an
+// identifier, this is not done as part of the licenseref updates.
+if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0.1'))
+{
+  $dbManager->begin();
+  $row = $dbManager->getSingleRow("
+    SELECT rf1.rf_pk AS id_3dfx,
+           rf2.rf_pk AS id_glide
+    FROM license_ref rf1
+      INNER JOIN license_ref rf2 USING (rf_fullname)
+    WHERE rf1.rf_shortname='3DFX'
+      AND rf2.rf_shortname='Glide'
+    LIMIT 1", array(), 'old.3dfx.rf_pk');
+  if (count($row))
+  {
+    $id_3dfx = intval($row['id_3dfx']);
+    $id_glide = intval($row['id_glide']);
+    $dbManager->queryOnce("DELETE FROM license_ref WHERE rf_pk=$id_glide");
+    $dbManager->queryOnce("UPDATE license_ref SET rf_shortname='Glide' WHERE rf_pk=$id_3dfx");
+  }
+  $dbManager->commit();
+
+  $sysconfig['Release'] = "3.0.2";
+}
+
+if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0.2'))
+{
+  require_once("$LIBEXECDIR/dbmigrate_multiple_copyright_decisions.php");
+
+  $sysconfig['Release'] = "3.1.0";
+}
+
 $dbManager->begin();
 $dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Release'),$sqlLog='drop.sysconfig.release');
 $dbManager->insertTableRow('sysconfig',
         array('variablename'=>'Release','conf_value'=>$sysconfig['Release'],'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
 $dbManager->commit();
-
+/* email/url/author data migration to other table */
+require_once("$LIBEXECDIR/dbmigrate_copyright-author.php");
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");
 $checker = new SanityChecker($dbManager,$Verbose);
@@ -351,20 +385,20 @@ function initLicenseRefTable($Verbose)
     print "FATAL: Unable to access '$LIBEXECDIR'.\n";
     return (1);
   }
-  
+
   $dbManager->queryOnce("BEGIN");
   $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2",$stmt=__METHOD__.'.dropAncientBackUp');
   /* create a new temp table structure only - license_ref_2 */
   $dbManager->queryOnce("CREATE TABLE license_ref_2 as select * from license_ref WHERE 1=2",$stmt=__METHOD__.'.backUpData');
 
-  /** import licenseref.sql */  
+  /** import licenseref.sql */
   $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
   $sqlstmts = str_replace("license_ref","license_ref_2", $sqlstmts);
   $dbManager->queryOnce($sqlstmts);
-  
+
   $dbManager->prepare(__METHOD__.".newLic", "select * from license_ref_2");
   $result_new = $dbManager->execute(__METHOD__.".newLic");
-  
+
   $dbManager->prepare(__METHOD__.'.licenseRefByShortname','SELECT * from license_ref where rf_shortname=$1');
   /** traverse all records in user's license_ref table, update or insert */
   while ($row = pg_fetch_assoc($result_new))

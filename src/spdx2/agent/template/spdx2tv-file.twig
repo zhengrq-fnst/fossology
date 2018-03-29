@@ -10,8 +10,8 @@
 FileName: {{ fileName }}
 SPDXID: SPDXRef-item{{ fileId }}
 {# FileType: OTHER #}
-FileChecksum: SHA1: {{ sha1 }}
-FileChecksum: MD5: {{ md5 }}
+FileChecksum: SHA1: {{ sha1 | lower }}
+FileChecksum: MD5: {{ md5 | lower }}
 {% if isCleared %}
 {% if concludedLicenses|default is empty %}
 LicenseConcluded: NONE
@@ -30,7 +30,7 @@ LicenseInfoInFile: {{ lic|replace({' ':'-'})}}
 {% endif %}
 {# FileSize: 48 Kb (49173 bytes) #}
 {% if copyrights|default is empty %}
-FileCopyrightText: NONE
+FileCopyrightText: NOASSERTION
 {% else %}
 FileCopyrightText: <text> {{ copyrights|join('\n')
                                        |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})

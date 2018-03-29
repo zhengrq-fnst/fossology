@@ -214,17 +214,17 @@ class search extends FO_Plugin
       $NeedAnd=1;
     }
 
-    if (!empty($SizeMin))
+    if (!empty($SizeMin) && is_numeric($SizeMin))
     {
       if ($NeedAnd)  $SQL .= " AND";
-      $SQL .= " pfile.pfile_size >= $SizeMin";
+      $SQL .= " pfile.pfile_size >= ".pg_escape_string($SizeMin);
       $NeedAnd=1;
     }
 
-    if (!empty($SizeMax))
+    if (!empty($SizeMax) && is_numeric($SizeMax))
     {
       if ($NeedAnd)  $SQL .= " AND"; 
-      $SQL .= " pfile.pfile_size <= $SizeMax";
+      $SQL .= " pfile.pfile_size <= ".pg_escape_string($SizeMax);
       $NeedAnd=1;
     }
 
@@ -371,7 +371,7 @@ class search extends FO_Plugin
     }
 
     $SizeMin = GetParm("sizemin",PARM_TEXT);
-    if (!empty($SizeMin) && ($SizeMin >= 0))
+    if (!empty($SizeMin) && is_numeric($SizeMin) && ($SizeMin >= 0))
     { 
       $SizeMin=intval($SizeMin); 
       $CriteriaCount++;
@@ -380,7 +380,7 @@ class search extends FO_Plugin
     }
 
     $SizeMax = GetParm("sizemax",PARM_TEXT);
-    if (!empty($SizeMax) && ($SizeMax >= 0))
+    if (!empty($SizeMax) && is_numeric($SizeMax) && ($SizeMax >= 0))
     { 
       $SizeMax=intval($SizeMax); 
       $CriteriaCount++;
@@ -411,10 +411,10 @@ class search extends FO_Plugin
     if ($CriteriaCount)
     {
       if (empty($Page)) { $Page = 0; }
-      $html = "<hr>\n";
-      $text = _("Files matching");
-      $html .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
       $UploadtreeRecs = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
+      $html = "<hr>\n";
+      $text = sizeof($UploadtreeRecs) . " " . _("Files matching");
+      $html .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
       $html .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright);
       $this->vars["result"] = $html;
     }

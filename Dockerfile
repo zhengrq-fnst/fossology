@@ -8,12 +8,12 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:stable
+FROM debian:8.8
 
 MAINTAINER Fossology <fossology@fossology.org>
 
 WORKDIR /fossology
-ADD . .
+COPY . .
 
 RUN apt-get update && \
     apt-get install -y lsb-release sudo postgresql php5-curl libpq-dev libdbd-sqlite3-perl libspreadsheet-writeexcel-perl && \
@@ -34,7 +34,7 @@ RUN cp /fossology/install/src-install-apache-example.conf /etc/apache2/conf-avai
 
 RUN /fossology/install/scripts/php-conf-fix.sh --overwrite
 
-EXPOSE 80
+EXPOSE 8081
 
 RUN chmod +x /fossology/docker-entrypoint.sh
 ENTRYPOINT ["/fossology/docker-entrypoint.sh"]

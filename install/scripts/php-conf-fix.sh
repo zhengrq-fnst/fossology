@@ -4,9 +4,29 @@
 #
 # uses phpIni to store file path - change if required
 #
+PHP5_PATH=/etc/php5/apache2/php.ini
+PHP7_PATH=/etc/php/7.0/apache2/php.ini
+phpIni=""
+
 echo 'Automated php.ini configuration adjustments'
 echo
-phpIni=/etc/php5/apache2/php.ini
+if [ -f /etc/redhat-release ]; then
+    phpIni=/etc/php.ini
+    TIMEZONE=`readlink -f /etc/localtime | sed 's%/usr/share/zoneinfo/%%'`
+elif [ -f ${PHP5_PATH} ]; then
+    phpIni=${PHP5_PATH}
+    TIMEZONE=`cat /etc/timezone`
+elif [ -f ${PHP7_PATH} ]; then
+    phpIni=${PHP7_PATH}
+else
+    phpIni=/etc/php5/apache2/php.ini
+    TIMEZONE=`cat /etc/timezone`
+fi
+
+if [ -z $TIMEZONE ]; then
+    TIMEZONE="America/Denver"
+fi
+
 if [ -e $phpIni ]
 then
     echo 'Copies php.ini to current directory and creates a backup file'
@@ -22,6 +42,8 @@ then
     sed -i 's/^\(post_max_size\s*=\s*\).*$/\1701M/' php.ini
     echo 'Setting max upload filesize to 700M'
     sed -i 's/^\(upload_max_filesize\s*=\s*\).*$/\1700M/' php.ini
+    echo "Setting timezone to $TIMEZONE"
+    sed -i "s%.*date.timezone =.*%date.timezone = $TIMEZONE%" php.ini
     echo 'php.ini adjusted!'
     echo
     echo 'Display the changes made'
@@ -36,4 +58,3 @@ then
 else
     echo 'php.ini was not located as expected. Please adjust phpIni to suit.'
 fi
-

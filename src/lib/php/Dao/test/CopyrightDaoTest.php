@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2017, Siemens AG
 Author: Daniele Fognini, Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -102,7 +102,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 
   private function setUpClearingTables()
   {
-    $this->testDb->createPlainTables(array('copyright','copyright_audit','uploadtree','copyright_decision'));
+    $this->testDb->createPlainTables(array('copyright','uploadtree','copyright_decision'));
     $this->testDb->createInheritedTables(array('uploadtree_a'));
     $this->testDb->insertData(array('copyright','uploadtree_a'));
 
@@ -110,10 +110,10 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb->alterTables(array('copyright','copyright_decision'));
   }
 
-  private function searchContent($array, $content)
+  private function searchContent($array, $content, $key='content')
   {
     foreach($array as $entry) {
-      if ($entry['content'] === $content) {
+      if ($entry[$key] === $content) {
         return true;
       }
     }
@@ -130,6 +130,18 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
     $this->assertEquals(14, count($entries));
     $this->assertTrue($this->searchContent($entries,"info@3dfx.com"));
+  }
+
+  public function testGetAllEntriesReport()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+
+    $entries = $copyrightDao->getAllEntriesReport("copyright", 1, "uploadtree_a");
+    $this->assertEquals(15, count($entries));
+    $this->assertTrue($this->searchContent($entries,"copyright 3dfx interactive, inc. 1999, all rights reserved this \n"));
   }
 
   public function testGetAllEntriesOnlyStatementsAndIndentifyedIfCleared()
@@ -165,6 +177,20 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED);
     $this->assertEquals(0, count($entries));
+  }
+
+  public function testGetAllEntriesForReport_afterADecision()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+
+    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment"); // pfile_fk=4 => uploadtree_pk=7
+    $entries = $copyrightDao->getAllEntriesReport("copyright", 1, "uploadtree_a", "statement", false, DecisionTypes::IDENTIFIED);
+    $this->assertTrue($this->searchContent($entries, "desc", 'description'));
+    $this->assertTrue($this->searchContent($entries, "text", 'textfinding'));
+    $this->assertTrue($this->searchContent($entries, "comment", 'comments'));
   }
 
   public function testGetAllEntriesOnlyStatementsAndOnlyClearedIndentifyed_afterADecision()
@@ -237,7 +263,8 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
 
-    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
+    $decisionId = $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
+    $copyrightDao->removeDecision("copyright_decision", 4, $decisionId);
     $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IRRELEVANT,"desc1","text1","comment1");
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "content LIKE 'written%'");
     $this->assertEquals(0, count($entries));
@@ -270,11 +297,6 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
     $copyrightDao->updateTable($item, $hash2, $content='foo', $userId=55);
-    
-    $audit = $this->dbManager->getSingleRow('SELECT * FROM copyright_audit WHERE ct_fk=$1',array($ctPk),__METHOD__.'.audit');
-    assertThat($audit, hasKeyValuePair('ct_fk',$ctPk));
-    assertThat($audit, hasKeyValuePair('oldtext','modified versions of this software. you must, however, include this copyright statement along with any code built using doc software that you release. no copyright statement needs to be provided if you'));
-    assertThat($audit, hasKeyValuePair('user_fk',$userId));
 
     $updatedCp = $this->dbManager->getSingleRow('SELECT * FROM copyright WHERE ct_pk=$1',array($ctPk),__METHOD__.'.cp');
     assertThat($updatedCp['content'],is(equalTo($content)));
@@ -291,7 +313,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     
     $item = new ItemTreeBounds(6,'uploadtree_a',1,17,18);
     $hash2 = '0x3a910990f114f12f';
-    $copyrightDao->updateTable($item, $hash2, $content='', 55);
+    $copyrightDao->updateTable($item, $hash2, $content='', 55, 'copyright', 'delete');
     
     $remainingEntries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
     $remainingCount = count($remainingEntries);

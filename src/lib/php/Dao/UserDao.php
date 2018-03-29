@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  * Author: J. Najjar, S. Weber, A. Wührl
  *
  * This program is free software; you can redistribute it and/or
@@ -247,6 +247,15 @@ class UserDao extends Object
   }
 
   /**
+   * @param $userPk
+   * @return array
+   */
+  public function getUserByPk($userPk)
+  {
+    return $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_pk = $1", array($userPk), __FUNCTION__);
+  }
+
+  /**
    * @param $groupName
    * @return array
    */
@@ -372,5 +381,33 @@ class UserDao extends Object
       throw new \Exception('unknown user with id='.$userId);
     }
     return $userRow['user_name'];
+  }
+
+  /**
+   * @param $groupId
+   * @return array
+   */
+  public function getGroupNameById($groupId)
+  {
+    $groupRow =  $this->dbManager->getSingleRow("SELECT group_name FROM groups WHERE group_pk = $1",array($groupId),__METHOD__);
+    if (empty($groupRow))
+    {
+      throw new \Exception('Error: GroupId ='. $groupId .' not a member of a valid group.');
+    }
+    return $groupRow['group_name'];
+  }
+
+  /**
+   * @param int $userId
+   * @return string
+   */
+  public function getUserEmail($userId)
+  {
+    $userRow = $this->dbManager->getSingleRow("SELECT user_email FROM users WHERE user_pk=$1",array($userId),__METHOD__);
+    if(!$userRow)
+    {
+      throw new \Exception('unknown user with id='.$userId);
+    }
+    return $userRow['user_email'];
   }
 }

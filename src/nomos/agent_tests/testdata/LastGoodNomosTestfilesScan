@@ -32,8 +32,8 @@ File NomosTestfiles/Zlib/zutil.h contains license(s) Zlib-possibility
 File NomosTestfiles/Zlib/zlibLicense-1.2.2-2004-Oct-03 contains license(s) Zlib
 File NomosTestfiles/Zlib/blast.c contains license(s) Zlib-possibility
 File NomosTestfiles/Zlib/OSIzlibLicense-2006-10-31 contains license(s) Zlib
-File NomosTestfiles/3DFX/test2.dtd contains license(s) 3DFX
-File NomosTestfiles/3DFX/test1.dtd contains license(s) 3DFX
+File NomosTestfiles/Glide/test2.dtd contains license(s) Glide
+File NomosTestfiles/Glide/test1.dtd contains license(s) Glide
 File NomosTestfiles/SugarCRM/SugarCRM-1.1.3.txt contains license(s) SugarCRM-1.1.3
 File NomosTestfiles/Public-domain/dirent.c contains license(s) Public-domain
 File NomosTestfiles/Public-domain/nwlib.c contains license(s) Public-domain
@@ -662,6 +662,7 @@ File NomosTestfiles/COMMERCIAL/commercial2.txt contains license(s) Intel.Commerc
 File NomosTestfiles/COMMERCIAL/commercial3.txt contains license(s) AndroidFraunhofer.Commercial
 File NomosTestfiles/Beerware/hash_md5prime.c contains license(s) Beerware,RSA-Security
 File NomosTestfiles/TrueCrypt/truecrypt.txt contains license(s) TrueCrypt-3.0
+File NomosTestfiles/RSA-Cryptoki/RSA-Cryptoki.txt contains license(s) RSA-Cryptoki
 File NomosTestfiles/UnclassifiedLicense/README.win64.txt contains license(s) UnclassifiedLicense
 File NomosTestfiles/No_license_found/utf-8-bom.html contains license(s) No_license_found
 File NomosTestfiles/Artistic-1.0-cl8/Artistic-1.0-cl8.txt contains license(s) Artistic-1.0-cl8

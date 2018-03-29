@@ -154,9 +154,9 @@ class FolderDao extends Object
     $this->dbManager->prepare($statementName, $this->getFolderTreeCte($parentId)
             . " SELECT folder_pk, parent_fk, folder_name, folder_desc, folder_perm, depth FROM folder_tree ORDER BY name_path");
     $res = $this->dbManager->execute($statementName, $parameters);
-  
+
     $userGroupMap = $this->userDao->getUserGroupMap(Auth::getUserId());
-    
+
     $results = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
@@ -202,8 +202,24 @@ GROUP BY group_fk
     $this->dbManager->freeResult($res);
     return $results;
   }
-  
-  
+
+  public function getAllFolderIds()
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName, "SELECT DISTINCT folder_pk FROM folder");
+    $res = $this->dbManager->execute($statementName);
+    $results = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+
+    $allIds = array();
+    for($i=0; $i < sizeof($results); $i++)
+    {
+      array_push($allIds, intval($results[$i]['folder_pk']));
+    }
+
+    return $allIds;
+  }
+
   public function getFolderChildUploads($parentId, $trustGroupId)
   {
     $statementName = __METHOD__;

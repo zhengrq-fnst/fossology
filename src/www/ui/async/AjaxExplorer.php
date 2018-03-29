@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
- *               2014-2015 Siemens AG
+ *               2014-2017 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -64,7 +64,7 @@ class AjaxExplorer extends DefaultPlugin
   /** @var array [uploadtree_id]=>cnt */
   private $filesToBeCleared;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
   
   public function __construct() {
     parent::__construct(self::NAME, array(
@@ -439,7 +439,7 @@ class AjaxExplorer extends DefaultPlugin
       $getTextEditBulk = _("Bulk");
       $fileListLinks .= "[<a href='#' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
     }
-
+    $fileListLinks .= "<input type='checkbox' id='selectedForIrrelevant' value='".$childUploadTreeId."'>";
     $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getItemId()
         , $this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getItemId()] : 0;
 
@@ -449,6 +449,10 @@ class AjaxExplorer extends DefaultPlugin
     $filesCleared = $filesToBeCleared - $filesThatShouldStillBeCleared;
 
     $img = ($filesCleared == $filesToBeCleared) ? 'green' : 'red';
+
+    // override green/red flag with yellow flag in case of single file with decision type "To Be Discussed"
+    $isDecisionTBD = $this->clearingDao->isDecisionTBD($childUploadTreeId, $groupId);
+    $img = $isDecisionTBD ? 'yellow' : $img;
 
     return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
   } 

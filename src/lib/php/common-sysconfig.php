@@ -101,7 +101,8 @@ function ConfigInit($sysconfdir, &$SysConf)
   $PG_CONN = DBconnect($sysconfdir);
 
   global $container;
-  $container->get('db.manager')->setDriver(new \Fossology\Lib\Db\Driver\Postgres($PG_CONN));
+  $postgresDriver = new \Fossology\Lib\Db\Driver\Postgres($PG_CONN);
+  $container->get('db.manager')->setDriver($postgresDriver);
 
   /**************** read/create/populate the sysconfig table *********/
   /* create if sysconfig table if it doesn't exist */
@@ -266,6 +267,36 @@ function Populate_sysconfig()
   $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
   . CONFIG_TYPE_TEXT .
                     ",'Number', null, '$contextDesc', null";
+
+  /* Report Header Text */
+  $Variable = "ReportHeaderText";
+  $contextNamePrompt = _("Report Header Text");
+  $contextValue = "FOSSology";
+  $contextDesc = _("Report Header Text at right side corner");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'ReportText', null, '$contextDesc', null";
+  $Variable = "CommonObligation";
+  $contextNamePrompt = _("Common Obligation");
+  $contextValue = "";
+  $contextDesc = _("Common Obligation Text, add line break at the end of the line");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXTAREA .
+                    ",'ReportText', null, '$contextDesc', null";
+  $Variable = "AdditionalObligation";
+  $contextNamePrompt = _("Additional Obligation");
+  $contextValue = "";
+  $contextDesc = _("Additional Obligation Text, add line break at the end of the line");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXTAREA .
+                    ",'ReportText', null, '$contextDesc', null";
+  $Variable = "ObligationAndRisk";
+  $contextNamePrompt = _("Obligation And Risk Assessment");
+  $contextValue = "";
+  $contextDesc = _("Obligations and risk assessment, add line break at the end of the line");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXTAREA .
+                    ",'ReportText', null, '$contextDesc', null";
 
   $Variable = "BlockSizeHex";
   $hexPrompt = _("Chars per page in hex view");

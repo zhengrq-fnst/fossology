@@ -1,6 +1,6 @@
 /********************************************************
  Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2016 Siemens AG
+ Copyright (C) 2015-2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -363,7 +363,7 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
                  SQL, __FILE__, __LINE__);
 
   /* Remove pfiles with reuse */
-  snprintf(SQL,MAXSQL,"DELETE FROM %s USING uploadtree WHERE pfile_pk = uploadtree.pfile_fk AND uploadtree.upload_fk != %ld;",TempTable,UploadId);
+  snprintf(SQL,MAXSQL,"DELETE FROM uploadtree USING %s WHERE pfile_pk = uploadtree.pfile_fk AND uploadtree.upload_fk != %ld;",TempTable,UploadId);
   PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
 
   if (Verbose)
@@ -501,22 +501,42 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
  */
 int unlinkContent (long child, long parent, int mode, int user_id, int user_perm)
 {
-  PGresult *result;
+  int cnt, cntUpload;
   char SQL[MAXSQL];
-  int cnt;
+  PGresult *result;
 
   // TODO: add permission checks
-
-  snprintf(SQL,MAXSQL,"SELECT COUNT(DISTINCT parent_fk) FROM foldercontents WHERE foldercontents_mode=%d AND child_id=%ld",mode,child);
+  if(mode == 1){
+    snprintf(SQL,MAXSQL,"SELECT COUNT(DISTINCT parent_fk) FROM foldercontents WHERE foldercontents_mode=%d AND child_id=%ld",mode,child);
+  }
+  else{
+    snprintf(SQL,MAXSQL,"SELECT COUNT(parent_fk) FROM foldercontents WHERE foldercontents_mode=%d AND"
+                        " child_id in (SELECT upload_pk FROM folderlist WHERE pfile_fk="
+                        "(SELECT pfile_fk FROM folderlist WHERE upload_pk=%ld limit 1))",
+                        mode,child);
+  }
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
     return -1;
   }
-  cnt = atol(PQgetvalue(result,0,0));
+  cnt = atoi(PQgetvalue(result,0,0));
   PQclear(result);
   if(cnt>1 && !Test)
   {
+    if(mode == 2){
+      snprintf(SQL,MAXSQL,"SELECT COUNT(DISTINCT parent_fk) FROM foldercontents WHERE foldercontents_mode=1 AND child_id=%ld",parent);
+      result = PQexec(db_conn, SQL);
+      if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+      {
+        return -1;
+      }
+      cntUpload = atoi(PQgetvalue(result,0,0));
+      PQclear(result);
+      if(cntUpload > 1){     // check for copied/duplicate folder
+        return 0;
+      }
+    }
     snprintf(SQL,MAXSQL,"DELETE FROM foldercontents WHERE foldercontents_mode=%d AND child_id =%ld AND parent_fk=%ld",mode,child,parent);
     PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
     return 0;
@@ -542,13 +562,13 @@ int unlinkContent (long child, long parent, int mode, int user_id, int user_perm
  */
 int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_id, int user_perm)
 {
-  int r,MaxRow;
+  int r, i, rc, MaxRow;
+  int count, resultUploadCount;
   long Fid;
-  int i;
   char *Desc;
-  PGresult *result;
-  char SQL[MAXSQL];
-  int rc;
+  char SQL[MAXSQL], SQLUpload[MAXSQL];
+  char SQLFolder[MAXSQLFolder];
+  PGresult *result, *resultUpload, *resultFolder;
 
   rc = check_write_permission_folder(Parent, user_id, user_perm);
   if(rc < 0)
@@ -559,10 +579,14 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
     return 1;
   }
 
-  /* Find all folders with this parent and recurse */
-  snprintf(SQL,MAXSQL,"SELECT folder_pk,foldercontents_mode,name,description,upload_pk FROM folderlist "
-          "WHERE parent=%ld "
-          "ORDER BY name,parent,folder_pk",Parent);
+  snprintf(SQLFolder, MAXSQLFolder,"SELECT COUNT(*) FROM folderlist WHERE folder_pk=%ld",Parent);
+  resultFolder = PQexec(db_conn, SQLFolder);
+  count= atoi(PQgetvalue(resultFolder,0,0));
+  PQclear(resultFolder);
+
+  /* Find all folders with this parent and recurse, but don't show uploads, if they also exist in other directories */
+  snprintf(SQL,MAXSQL,"SELECT folder_pk,foldercontents_mode,name,description,upload_pk,pfile_fk FROM folderlist WHERE parent=%ld"
+                      " ORDER BY name,parent,folder_pk ", Parent);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
@@ -594,7 +618,7 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
         printf("\n");
       }
       rc = listFoldersRecurse(Fid,Depth+1,Parent,DelFlag,user_id,user_perm);
-      if (rc < 1)
+      if (rc < 0)
       {
         if (DelFlag)
         {
@@ -605,8 +629,7 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
     }
     else
     {
-      rc = unlinkContent(Parent,Row,1,user_id,user_perm);
-      if (DelFlag==1 && rc == 0)
+      if (DelFlag==1 && unlinkContent(Parent,Row,1,user_id,user_perm)==0)
       {
         continue;
       }
@@ -616,15 +639,27 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
       }
       if (DelFlag)
       {
-        rc = deleteUpload(atol(PQgetvalue(result,r,4)),user_id, user_perm);
-        if (rc < 0)
+        snprintf(SQLUpload, MAXSQL,"SELECT COUNT(*) FROM folderlist WHERE pfile_fk=%ld", atol(PQgetvalue(result,r,5)));
+        resultUpload = PQexec(db_conn, SQLUpload);
+        resultUploadCount = atoi(PQgetvalue(resultUpload,0,0));
+        if(count < 2 && resultUploadCount < 2)
         {
-          return rc;
+          rc = deleteUpload(atol(PQgetvalue(result,r,4)),user_id, user_perm);
+          if (rc < 0)
+          {
+            return rc;
+          }
+          if (rc != 0)
+          {
+            printf("Deleting the folder failed since it contains uploads you can't delete.");
+            return rc;
+          }
         }
-        if (rc != 0)
-        {
-          printf("Deleting the folder failed since it contains uploads you can't delete.");
-          return rc;
+        else{
+          rc = unlinkContent(atol(PQgetvalue(result,r,4)),Parent,2,user_id,user_perm);
+          if(rc < 0){
+            return rc;
+          }
         }
       }
       else
@@ -675,7 +710,10 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
           return rc;
         }
       }
-      snprintf(SQL,MAXSQL,"DELETE FROM foldercontents WHERE foldercontents_mode=1 AND child_id=%ld",Parent);
+      if(Row > 0)
+        snprintf(SQL,MAXSQL,"DELETE FROM foldercontents WHERE foldercontents_mode=1 AND parent_fk=%ld AND child_id=%ld",Row,Parent);
+      else
+        snprintf(SQL,MAXSQL,"DELETE FROM foldercontents WHERE foldercontents_mode=1 AND child_id=%ld",Parent);
       if (Test)
       {
         printf("TEST: %s\n",SQL);
@@ -684,8 +722,10 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
       {
         PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
       }
-
-      snprintf(SQL,MAXSQL,"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
+      if(Row > 0)
+        snprintf(SQL,MAXSQL,"DELETE FROM folder f USING foldercontents fc WHERE  f.folder_pk = fc.child_id AND fc.parent_fk='%ld' AND f.folder_pk = '%ld';",Row,Parent);
+      else
+        snprintf(SQL,MAXSQL,"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
       if (Test)
       {
         printf("TEST: %s\n",SQL);
@@ -909,9 +949,10 @@ int listUploads (int user_id, int user_perm)
  *        -1: failure
  *
  **/
-int deleteFolder(long FolderId, int user_id, int user_perm)
+int deleteFolder(long cFolder, long pFolder,  int user_id, int user_perm)
 {
-  return listFoldersRecurse(FolderId,0,-1,2,user_id,user_perm);
+  if(pFolder == 0) pFolder= -1 ;
+  return listFoldersRecurse(cFolder, 0,pFolder,2,user_id,user_perm);
 } /* deleteFolder() */
 
 /**********************************************************************/
@@ -936,7 +977,11 @@ int readAndProcessParameter (char *Parm, int user_id, int user_perm)
   int rc=0;     /* assume no data */
   int Type=0; /* 0=undefined; 1=delete; 2=list */
   int Target=0; /* 0=undefined; 1=upload; 2=license; 3=folder */
-  long Id;
+  const char s[2] = " ";
+  char *token;
+  char a[15];
+  long fd[2];
+  int i = 0, len = 0;
 
   if (!Parm)
   {
@@ -976,21 +1021,30 @@ int readAndProcessParameter (char *Parm, int user_id, int user_perm)
     Target=3; /* folder */
     L+=6;
   }
-  while(isspace(L[0])) L++;
-  Id = atol(L);
+
+  len = strlen(L);
+  memcpy(a, L,len); 
+  token = strtok(a, s);
+   
+  while( token != NULL ) 
+  {   
+    fd[i] = atol(token);
+    token = strtok(NULL, s);
+    i++;
+  }
 
   /* Handle the request */
   if ((Type==1) && (Target==1))
   {
-    rc = deleteUpload(Id, user_id, user_perm);
+    rc = deleteUpload(fd[0], user_id, user_perm);
   }
   else if ((Type==1) && (Target==2))
   {
-    rc = deleteLicense(Id, user_perm);
+    rc = deleteLicense(fd[0], user_perm);
   }
   else if ((Type==1) && (Target==3))
   {
-    rc = deleteFolder(Id, user_id, user_perm);
+    rc = deleteFolder(fd[1],fd[0], user_id, user_perm);
   }
   else if (((Type==2) && (Target==1)) || ((Type==2) && (Target==2)))
   {

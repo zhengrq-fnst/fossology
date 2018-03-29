@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+namespace Fossology\Reuser\Ui;
+
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
@@ -46,7 +48,21 @@ class ReuserPlugin extends DefaultPlugin
     
     $this->folderDao = $this->getObject('dao.folder');
   }
-    
+
+  function getAllUploads()
+  {
+    $allFolder = $this->folderDao->getAllFolderIds();
+    $result = array();
+    for($i=0; $i < sizeof($allFolder); $i++)
+    {
+      $listObject = $this->prepareFolderUploads($allFolder[$i]);
+      foreach ($listObject as $key => $value)
+      {
+        $result[explode(",",$key)[0]] = $value;
+      }
+    }
+    return $result;
+  }
 
   /**
    * @param Request $request
@@ -60,14 +76,21 @@ class ReuserPlugin extends DefaultPlugin
 
     if ($ajaxMethodName == "getUploads")
     {
-      $uploadsById = $this->prepareFolderUploads($folderId, $trustGroupId);
+      $uploadsById = "";
+      if(empty($folderId) || empty($trustGroupId))
+      {
+        $uploadsById = $this->getAllUploads();
+      }
+      else
+      {
+        $uploadsById = $this->prepareFolderUploads($folderId, $trustGroupId);
+      }
       return new JsonResponse($uploadsById, JsonResponse::HTTP_OK);
     }
     
     return new Response('called without valid method', Response::HTTP_METHOD_NOT_ALLOWED);
   }
-  
-  
+
   public function getFolderIdAndTrustGroup($folderGroup)
   {
     $folderGroupPair = explode(',', $folderGroup,2);

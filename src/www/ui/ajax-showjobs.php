@@ -354,7 +354,7 @@ class AjaxShowJobs extends FO_Plugin
           $varJobQueueRow['itemsPerSec'] = $itemsPerSec;
         }
         if (empty($jobqueueRec['jq_endtime'])) {
-          $varJobQueueRow['eta'] = $this->showJobsDao->getEstimatedTime($jobId, $jobqueueRec['jq_type'], $itemsPerSec, $job['job']['job_upload_fk']);
+          $varJobQueueRow['eta'] = $this->showJobsDao->getEstimatedTime($jobqueueRec['jq_job_fk'], $jobqueueRec['jq_type'], $itemsPerSec, $job['job']['job_upload_fk']);
         }
         $varJobQueueRow['canDoActions'] = 
                 ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) || (Auth::getUserId() == $job['job']['job_user_fk']);
@@ -374,6 +374,11 @@ class AjaxShowJobs extends FO_Plugin
             break;
           case 'dep5':
             $varJobQueueRow['download'] = "DEP5 copyright file";
+            break;
+          case 'reportImport':
+            $varJobQueueRow['download'] = "uploaded SPDX2 report";
+          case 'unifiedreport':
+            $varJobQueueRow['download'] = "Unified Report";
             break;
           default:
             $varJobQueueRow['download'] = "";
